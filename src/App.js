@@ -1,35 +1,155 @@
 import React from 'react';
 import {Form, Row, Col, Button} from 'react-bootstrap'
 
-const CURRENCIES = ["USD", "EUR", "CNY"];
-const PAIRS = ["USD/EUR", "USD/CNY", "EUR/CNY"];
+const CURRENCIES = ["", "AUD","BGN","BRL","CAD","CHF","CNY","CZK","DKK","EUR",
+"GBP","HKD","HRK","HUF","IDR","ILS","INR","ISK","JPY","KRW","MXN","MYR",
+"NOK","NZD","PHP","PLN","RON","RUB","SEK","SGD","THB","TRY","USD", "ZAR"];
 
 class App extends React.Component {
   state = {
-    selectedOption: null,
+    accountCurrency: "",
+    baseCurrency: "",
+    quoteCurrency: "",
+    action: "Buy",
+    currentPrice: "",
+    tradePrice: "",
+    numberOfUnits: "",
+    closingPrice: "",
+    profit: ""
   };
 
   handleChange(e) {
-    console.log(e.target.value);
+    const {accountCurrency, baseCurrency, quoteCurrency} = this.state;
+    switch (e.target.id) {
+      case "AccountCurrency": {
+        if (quoteCurrency) {
+          this.getRate(quoteCurrency, e.target.value)
+          .then((rate)=>{
+            this.setState({
+              currentPrice: rate
+            })
+          }) 
+        }
+        this.setState({
+          accountCurrency: e.target.value,
+          profit: ""
+        });
+        break;
+      }
+      case "BaseCurrency": {
+        if (quoteCurrency) {
+          this.getRate(e.target.value, quoteCurrency)
+          .then((rate)=>{
+            this.setState({
+              tradePrice: rate
+            })
+          }) 
+        }
+        this.setState({
+          baseCurrency: e.target.value,
+          profit: ""
+        });
+        break;
+      }
+      case "QuoteCurrency": {
+        if (accountCurrency) {
+          this.getRate(e.target.value, accountCurrency)
+          .then((rate)=>{
+            this.setState({
+              currentPrice: rate
+            })
+          }) 
+        }
+        if (baseCurrency) {
+          this.getRate(baseCurrency, e.target.value)
+          .then((rate)=>{
+            this.setState({
+              tradePrice: rate
+            })
+          }) 
+        }
+        this.setState({
+          quoteCurrency: e.target.value,
+          profit: ""
+        });
+        break;
+      }
+      case "Action": {
+        this.setState({
+          action: e.target.value,
+          profit: ""
+        });
+        break;
+      }
+      case "ClosingPrice": {
+        const value = e.target.value;
+        const reg = new RegExp(/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
+        if (value === '' || reg.test(value)) {
+          this.setState({
+            closingPrice: e.target.value,
+            profit: ""
+          });
+        }
+        break;
+      }
+      case "NumberOfUnits": {
+        const value = e.target.value;
+        const reg = new RegExp(/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
+        if (value === '' || reg.test(value)) {
+          this.setState({
+            numberOfUnits: e.target.value,
+            profit: ""
+          });
+        }
+        break;
+      }
+      default:
+        console.log("Unhandled event");
+    }
+  }
+
+  onClick() {
+    console.log(this.isFormValid());
+    this.setState({
+      profit: 42
+    });
+  }
+
+  getRate(base, quote) {
+    let promise = fetch(`https://api.exchangeratesapi.io/latest?base=${base}&symbols=${quote}`)
+    .then((resp) => resp.json())
+    .then((data) => data.rates[quote])
+    .catch(e=>{console.log(e)});
+    return promise;
   }
 
   getCurrenciesAsOptions()  {
-    return CURRENCIES.map(item=><option>{item}</option>);
+    let i = 0;
+    return CURRENCIES.map(item=><option key = {i++}>{item}</option>);
   }
 
-  getPairsAsOptions()  {
-    return PAIRS.map(item=><option>{item}</option>);
+  isFormValid() {
+    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice} = this.state;
+    return (
+      accountCurrency
+      && baseCurrency
+      && quoteCurrency
+      && currentPrice
+      && tradePrice
+      && numberOfUnits
+      && closingPrice
+      && numberOfUnits > 0
+      && closingPrice > 0
+      ) ? true : false;
   }
 
   render() {
-    let currencies = this.getCurrenciesAsOptions();
-    let pairs = this.getPairsAsOptions();
-    let middlePair = "USD/EUR" //TODO
-    let selectedCurrencyPair = "USD/EUR" //TODO
-    let currentPrice = 1.15; //TODO
-    let tradePrice = 0.16;  //TODO
-    let selectedAccountCurrency = "USD";  //TODO
-    let profit = 15.16;  //TODO
+    console.log(this.state)
+    const currencies = this.getCurrenciesAsOptions();
+    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit} = this.state;
+    const profitValue = (profit ? `${profit} ${accountCurrency}` : "");
+    const currentPriceValue = (currentPrice ? `${currentPrice} ${quoteCurrency}/${accountCurrency}` : "");
+    const tradePriceValue = (tradePrice ? `${tradePrice} ${baseCurrency}/${quoteCurrency}` : "");
 
     return (
       <div
@@ -56,15 +176,28 @@ class App extends React.Component {
             </Col>
           </Form.Group>
 
-          <Form.Group as={Row} controlId="CurrencyPair">
+          <Form.Group as={Row} controlId="BaseCurrency">
             <Form.Label column sm={5}>
-              Currency pair
+              Base Currency
             </Form.Label>
             <Col sm={7}>
               <Form.Control 
               as="select"
               onChange={this.handleChange.bind(this)}>
-                {pairs}
+                {currencies}
+              </Form.Control>
+            </Col>
+          </Form.Group>
+
+          <Form.Group as={Row} controlId="QuoteCurrency">
+            <Form.Label column sm={5}>
+              Quote Currency
+            </Form.Label>
+            <Col sm={7}>
+              <Form.Control 
+              as="select"
+              onChange={this.handleChange.bind(this)}>
+                {currencies}
               </Form.Control>
             </Col>
           </Form.Group>
@@ -74,7 +207,7 @@ class App extends React.Component {
               Current price
             </Form.Label>
             <Col sm={7}>
-              <Form.Control plaintext readOnly defaultValue={currentPrice + " " + middlePair} />
+              <Form.Control plaintext readOnly value={currentPriceValue} />
             </Col>
           </Form.Group>
 
@@ -83,7 +216,7 @@ class App extends React.Component {
               TradePrice
             </Form.Label>
             <Col sm={7}>
-              <Form.Control plaintext readOnly defaultValue={tradePrice + " " + selectedCurrencyPair} />
+              <Form.Control plaintext readOnly value={tradePriceValue} />
             </Col>
           </Form.Group>
 
@@ -106,7 +239,10 @@ class App extends React.Component {
               Closing price
             </Form.Label>
             <Col sm={7}>
-              <Form.Control/>
+              <Form.Control
+              value = {closingPrice}
+              onChange={this.handleChange.bind(this)}
+              />
             </Col>
           </Form.Group>
 
@@ -115,13 +251,17 @@ class App extends React.Component {
               Number of units
             </Form.Label>
             <Col sm={7}>
-              <Form.Control/>
+              <Form.Control
+                value = {numberOfUnits}
+                onChange={this.handleChange.bind(this)}
+              />
             </Col>
           </Form.Group>
 
           <Form.Group>
               <Button
               type="button"
+              onClick={this.onClick.bind(this)}
               style={{
               display:"block",
               margin:"auto"}}
@@ -133,7 +273,7 @@ class App extends React.Component {
               Profit 
             </Form.Label>
             <Col sm={7}>
-              <Form.Control plaintext readOnly defaultValue={profit + " " + selectedAccountCurrency} />
+              <Form.Control plaintext readOnly value={profitValue} />
             </Col>
           </Form.Group>
         </Form> 
