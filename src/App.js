@@ -6,17 +6,23 @@ const CURRENCIES = ["", "AUD","BGN","BRL","CAD","CHF","CNY","CZK","DKK","EUR",
 "NOK","NZD","PHP","PLN","RON","RUB","SEK","SGD","THB","TRY","USD", "ZAR"];
 
 class App extends React.Component {
-  state = {
-    accountCurrency: "",
-    baseCurrency: "",
-    quoteCurrency: "",
-    action: "Buy",
-    currentPrice: "",
-    tradePrice: "",
-    numberOfUnits: "",
-    closingPrice: "",
-    profit: ""
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      accountCurrency: "",
+      baseCurrency: "",
+      quoteCurrency: "",
+      action: "Buy",
+      currentPrice: "",
+      tradePrice: "",
+      numberOfUnits: "",
+      closingPrice: "",
+      profit: "",
+      validated: false
+    };
+    this.onClick = this.onClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
 
   handleChange(e) {
     const {accountCurrency, baseCurrency, quoteCurrency} = this.state;
@@ -109,10 +115,20 @@ class App extends React.Component {
   }
 
   onClick() {
-    console.log(this.isFormValid());
-    this.setState({
-      profit: 42
-    });
+    if (this.isFormValid()) {
+      const {action, currentPrice, tradePrice, numberOfUnits, closingPrice} = this.state;
+      let profit = (closingPrice - tradePrice) * currentPrice * numberOfUnits;
+      if (action === "Sell") profit = profit * -1;
+      profit = profit.toFixed(2);
+      this.setState({
+        validated: false,
+        profit
+      });
+    } else {
+      this.setState({
+        validated: true
+      });
+    }
   }
 
   getRate(base, quote) {
@@ -138,15 +154,13 @@ class App extends React.Component {
       && tradePrice
       && numberOfUnits
       && closingPrice
-      && numberOfUnits > 0
-      && closingPrice > 0
       ) ? true : false;
   }
 
   render() {
     console.log(this.state)
     const currencies = this.getCurrenciesAsOptions();
-    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit} = this.state;
+    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit, validated} = this.state;
     const profitValue = (profit ? `${profit} ${accountCurrency}` : "");
     const currentPriceValue = (currentPrice ? `${currentPrice} ${quoteCurrency}/${accountCurrency}` : "");
     const tradePriceValue = (tradePrice ? `${tradePrice} ${baseCurrency}/${quoteCurrency}` : "");
@@ -162,15 +176,17 @@ class App extends React.Component {
         margin:"20px"
         }}
         >Profit calculator</h3>
-        <Form>
+        <Form noValidate validated={validated}>
           <Form.Group as={Row} controlId="AccountCurrency">
             <Form.Label column sm={5}>
               Account currency
             </Form.Label>
             <Col sm={7}>
               <Form.Control 
-              as="select"
-              onChange={this.handleChange.bind(this)}>
+                as="select"
+                onChange={this.handleChange}
+                required
+              >
                 {currencies}
               </Form.Control>
             </Col>
@@ -182,8 +198,10 @@ class App extends React.Component {
             </Form.Label>
             <Col sm={7}>
               <Form.Control 
-              as="select"
-              onChange={this.handleChange.bind(this)}>
+                as="select"
+                onChange={this.handleChange}
+                required
+              >
                 {currencies}
               </Form.Control>
             </Col>
@@ -195,8 +213,10 @@ class App extends React.Component {
             </Form.Label>
             <Col sm={7}>
               <Form.Control 
-              as="select"
-              onChange={this.handleChange.bind(this)}>
+                as="select"
+                onChange={this.handleChange}
+                required  
+              >
                 {currencies}
               </Form.Control>
             </Col>
@@ -227,7 +247,7 @@ class App extends React.Component {
             <Col sm={7}>
               <Form.Control 
               as="select"
-              onChange={this.handleChange.bind(this)}>
+              onChange={this.handleChange}>
                 <option>Buy</option>
                 <option>Sell</option>
               </Form.Control>
@@ -241,27 +261,30 @@ class App extends React.Component {
             <Col sm={7}>
               <Form.Control
               value = {closingPrice}
-              onChange={this.handleChange.bind(this)}
+              onChange={this.handleChange}
+              required
               />
             </Col>
           </Form.Group>
+          
 
-          <Form.Group as={Row} controlId="NumberOfUnits">
+          <Form.Group as={Row} controlId="NumberOfUnits" >
             <Form.Label column sm={5}>
               Number of units
             </Form.Label>
             <Col sm={7}>
               <Form.Control
                 value = {numberOfUnits}
-                onChange={this.handleChange.bind(this)}
+                onChange={this.handleChange}
+                required
               />
             </Col>
           </Form.Group>
-
+          
           <Form.Group>
               <Button
               type="button"
-              onClick={this.onClick.bind(this)}
+              onClick={this.onClick}
               style={{
               display:"block",
               margin:"auto"}}
@@ -281,7 +304,5 @@ class App extends React.Component {
     );
   }
 }
-
-
 
 export default App;
