@@ -158,7 +158,6 @@ class App extends React.Component {
   }
 
   render() {
-    console.log(this.state)
     const currencies = this.getCurrenciesAsOptions();
     const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit, validated} = this.state;
     const profitValue = (profit ? `${profit} ${accountCurrency}` : "");
@@ -285,6 +284,7 @@ class App extends React.Component {
               <Button
               type="button"
               onClick={this.onClick}
+              id="calculate-result-btn"
               style={{
               display:"block",
               margin:"auto"}}
