@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/profit_develop/static/css/main.34de6062.chunk.css",
-    "main.js": "/profit_develop/static/js/main.1a1c4789.chunk.js",
-    "main.js.map": "/profit_develop/static/js/main.1a1c4789.chunk.js.map",
-    "runtime~main.js": "/profit_develop/static/js/runtime~main.3ae18796.js",
-    "runtime~main.js.map": "/profit_develop/static/js/runtime~main.3ae18796.js.map",
-    "static/js/2.f763c66c.chunk.js": "/profit_develop/static/js/2.f763c66c.chunk.js",
-    "static/js/2.f763c66c.chunk.js.map": "/profit_develop/static/js/2.f763c66c.chunk.js.map",
-    "index.html": "/profit_develop/index.html",
-    "precache-manifest.d66109a848c4c34c33d75c19afba2432.js": "/profit_develop/precache-manifest.d66109a848c4c34c33d75c19afba2432.js",
-    "service-worker.js": "/profit_develop/service-worker.js",
-    "static/css/main.34de6062.chunk.css.map": "/profit_develop/static/css/main.34de6062.chunk.css.map"
+    "main.css": "/profit/static/css/main.34de6062.chunk.css",
+    "main.js": "/profit/static/js/main.5123c9bc.chunk.js",
+    "main.js.map": "/profit/static/js/main.5123c9bc.chunk.js.map",
+    "runtime~main.js": "/profit/static/js/runtime~main.002b2939.js",
+    "runtime~main.js.map": "/profit/static/js/runtime~main.002b2939.js.map",
+    "static/js/2.f763c66c.chunk.js": "/profit/static/js/2.f763c66c.chunk.js",
+    "static/js/2.f763c66c.chunk.js.map": "/profit/static/js/2.f763c66c.chunk.js.map",
+    "index.html": "/profit/index.html",
+    "precache-manifest.629fe5592b2d7f439369a283ff68ee88.js": "/profit/precache-manifest.629fe5592b2d7f439369a283ff68ee88.js",
+    "service-worker.js": "/profit/service-worker.js",
+    "static/css/main.34de6062.chunk.css.map": "/profit/static/css/main.34de6062.chunk.css.map"
   }
 }
