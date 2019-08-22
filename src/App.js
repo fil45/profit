@@ -18,7 +18,8 @@ class App extends React.Component {
       numberOfUnits: "",
       closingPrice: "",
       profit: "",
-      validated: false
+      validated: false,
+      showError: false
     };
     this.onClick = this.onClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -38,7 +39,8 @@ class App extends React.Component {
         }
         this.setState({
           accountCurrency: e.target.value,
-          profit: ""
+          profit: "",
+          showError: false
         });
         break;
       }
@@ -53,7 +55,8 @@ class App extends React.Component {
         }
         this.setState({
           baseCurrency: e.target.value,
-          profit: ""
+          profit: "",
+          showError: false
         });
         break;
       }
@@ -76,7 +79,8 @@ class App extends React.Component {
         }
         this.setState({
           quoteCurrency: e.target.value,
-          profit: ""
+          profit: "",
+          showError: false
         });
         break;
       }
@@ -89,7 +93,7 @@ class App extends React.Component {
       }
       case "ClosingPrice": {
         const value = e.target.value;
-        const reg = new RegExp(/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
+        const reg = new RegExp(/^([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
         if (value === '' || reg.test(value)) {
           this.setState({
             closingPrice: e.target.value,
@@ -100,7 +104,7 @@ class App extends React.Component {
       }
       case "NumberOfUnits": {
         const value = e.target.value;
-        const reg = new RegExp(/^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
+        const reg = new RegExp(/^([0-9]+([.][0-9]*)?|[.][0-9]+)$/);
         if (value === '' || reg.test(value)) {
           this.setState({
             numberOfUnits: e.target.value,
@@ -135,7 +139,12 @@ class App extends React.Component {
     let promise = fetch(`https://api.exchangeratesapi.io/latest?base=${base}&symbols=${quote}`)
     .then((resp) => resp.json())
     .then((data) => data.rates[quote])
-    .catch(e=>{console.log(e)});
+    .catch((e)=>{
+      console.log(e);
+      this.setState({
+        showError: true
+      });
+    });
     return promise;
   }
 
@@ -154,16 +163,16 @@ class App extends React.Component {
       && tradePrice
       && numberOfUnits
       && closingPrice
-      ) ? true : false;
+      );
   }
 
   render() {
     const currencies = this.getCurrenciesAsOptions();
-    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit, validated} = this.state;
+    const {accountCurrency, baseCurrency, quoteCurrency, currentPrice, tradePrice, numberOfUnits, closingPrice, profit, validated, showError} = this.state;
     const profitValue = (profit ? `${profit} ${accountCurrency}` : "");
     const currentPriceValue = (currentPrice ? `${currentPrice} ${quoteCurrency}/${accountCurrency}` : "");
     const tradePriceValue = (tradePrice ? `${tradePrice} ${baseCurrency}/${quoteCurrency}` : "");
-
+    const errorMessage = <p style={{color:"red"}}>Server connection error</p>;
     return (
       <div
       style={{width:"400px",
@@ -299,6 +308,8 @@ class App extends React.Component {
               <Form.Control plaintext readOnly value={profitValue} />
             </Col>
           </Form.Group>
+
+          {showError ? errorMessage : null}
         </Form> 
       </div>
     );
